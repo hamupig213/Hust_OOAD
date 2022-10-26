@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <script type="text/javascript" src="Stopwatch.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", "Tahoma",serif;
+        }
+        .container {
+            text-align: center;
+            width: 200px;
+            height: 400px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-left: -100px;
+            margin-top: -200px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .clock {
+        }
+    </style>
+    <style>
+        table {
+            width: 100%;
+        }
+        td {
+            width: 50%;
+        }
+
+        .order {
+        }
+        .local {
+            margin-left: 30px;
+            color: #999;
+        }
+        .total {
+            margin-left: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="clock">
+            <h3 id="clock-text"></h3>
+            <div id="latch-list" style="text-align: left; font-size: 80%">
+
+            </div>
+            <table id="actions" style="position: absolute; bottom: 0">
+                <tr>
+                    <td>
+                        <button id="reset-button" hidden onclick="reset()">Reset</button>
+                        <button id="latch-button" hidden onclick="latch()">Latch</button>
+                    </td>
+                    <td>
+                        <button id="start-button" onclick="start()">Start</button>
+                        <button id="pause-button" onclick="pause()" hidden>Pause</button>
+                        <button id="resume-button" onclick="resume()" hidden>Resume</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <script>
+        let clock = new Clock();
+        function showClock() {
+            document.getElementById("clock-text").innerHTML = clock.time.toString();
+        }
+
+        function  showFunction(name) {
+            for (let btn of document.getElementsByTagName("button")) {
+                btn.hidden = true;
+            }
+            for (let s of name.split(','))
+                document.getElementById(s + "-button").hidden = false;
+        }
+
+        function  start() {
+           resume()
+        }
+        function  reset() {
+            running = false;
+            clock.reset();
+            showClock();
+            showList();
+            showFunction("start");
+        }
+        function  pause() {
+            running = false;
+            showFunction("resume,reset");
+        }
+        function  resume() {
+            running = true;
+            showFunction("pause,latch");
+        }
+
+        function latch() {
+            clock.latch();
+            showList();
+        }
+        function showList() {
+            let div = document.getElementById("latch-list");
+            div.hidden = true;
+            div.innerHTML = "";
+
+            if (clock.list.length == 0) {
+                return;
+            }
+
+            div.hidden = false;
+            for (let i = clock.list.length - 1; i >= 0; i--) {
+                let t = clock.list[i];
+                let local = (i == 0 ? t : t.getSpan(clock.list[i - 1]));
+
+                let row = document.createElement("p");
+                let k = i + 1;
+                row.innerHTML = "<span class='order'>" + (k < 10 ? "0" : "") + k + "</span>"
+                    + "<span class='local'>+" + local.toString() + "</span>"
+                    + "<span class='total'>" + t.toString() + "</span>";
+
+                div.appendChild(row);
+            }
+        }
+        function  selectFunction() {
+
+        }
+    </script>
+    <script>
+
+        let running = false;
+        reset();
+        setInterval(function () {
+            if (running) {
+                clock.run();
+                showClock();
+            }
+        }, 10);
+
+
+    </script>
+</body>
+</html>
